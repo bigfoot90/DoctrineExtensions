@@ -101,7 +101,6 @@ class TranslatableIdentifierTest extends BaseTestCaseORM
         $data = $q->getResult();
         $this->assertCount(1, $data);
         $object = $data[0];
-var_dump($object);
         $this->assertEquals('title in en', $object->getTitle());
 
         $this->em->clear(); // based on 2.3.0 it caches in identity map

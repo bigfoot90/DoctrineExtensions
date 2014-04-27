@@ -163,19 +163,30 @@ class TranslationRepository extends EntityRepository
         $translationMeta = $this->getClassMetadata(); // table inheritance support
         if ($meta->hasField($field)) {
             $locale = $listener->getListenerLocale();
-            $dql = "SELECT trans.foreignKey FROM {$translationMeta->rootEntityName} trans";
-            $dql .= ' WHERE trans.objectClass = :class';
-            $dql .= ' AND trans.locale = :locale';
-            $dql .= ' AND trans.field = :field';
-            $dql .= ' AND trans.content = :value';
-            $q = $this->_em->createQuery($dql);
-            $q->setParameters(compact('class', 'locale', 'field', 'value'));
-            $q->setMaxResults(1);
-            $result = $q->getArrayResult();
-            $id = count($result) ? $result[0]['foreignKey'] : null;
+            $defaultLocale = $listener->getDefaultLocale();
+            if ($locale == $defaultLocale) {
+                $dql = "SELECT obj FROM $class obj";
+                $dql .= " WHERE obj.$field = :value";
+                $q = $this->_em->createQuery($dql);
+                $q->setParameters(compact('value'));
+                if ($result = $q->getResult()) {
+                    $entity = $result[0];
+                }
+            } else {
+                $dql = "SELECT trans.foreignKey FROM {$translationMeta->rootEntityName} trans";
+                $dql .= ' WHERE trans.objectClass = :class';
+                $dql .= ' AND trans.locale = :locale';
+                $dql .= ' AND trans.field = :field';
+                $dql .= ' AND trans.content = :value';
+                $q = $this->_em->createQuery($dql);
+                $q->setParameters(compact('class', 'locale', 'field', 'value'));
+                $q->setMaxResults(1);
+                $result = $q->getArrayResult();
+                $id = count($result) ? $result[0]['foreignKey'] : null;
 
-            if ($id) {
-                $entity = $this->_em->find($class, $id);
+                if ($id) {
+                    $entity = $this->_em->find($class, $id);
+                }
             }
         }
         return $entity;
