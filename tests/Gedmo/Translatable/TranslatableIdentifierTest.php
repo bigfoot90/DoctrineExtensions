@@ -72,6 +72,7 @@ class TranslatableIdentifierTest extends BaseTestCaseORM
         $this->em->clear();
 
         $repo = $this->em->getRepository(self::TRANSLATION);
+        $this->translatableListener->setTranslatableLocale('de_de');
 
         // test the entity load by translated title
         $object = $repo->findObjectByTranslatedField(
@@ -79,6 +80,8 @@ class TranslatableIdentifierTest extends BaseTestCaseORM
             'title in de',
             self::FIXTURE
         );
+
+        $this->translatableListener->setTranslatableLocale('en_en');
 
         $this->assertEquals($this->testObjectId, $object->getUid());
 
@@ -98,6 +101,7 @@ class TranslatableIdentifierTest extends BaseTestCaseORM
         $data = $q->getResult();
         $this->assertCount(1, $data);
         $object = $data[0];
+var_dump($object);
         $this->assertEquals('title in en', $object->getTitle());
 
         $this->em->clear(); // based on 2.3.0 it caches in identity map

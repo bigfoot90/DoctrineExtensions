@@ -158,15 +158,18 @@ class TranslationRepository extends EntityRepository
     public function findObjectByTranslatedField($field, $value, $class)
     {
         $entity = null;
+        $listener = $this->getTranslatableListener();
         $meta = $this->_em->getClassMetadata($class);
         $translationMeta = $this->getClassMetadata(); // table inheritance support
         if ($meta->hasField($field)) {
+            $locale = $listener->getListenerLocale();
             $dql = "SELECT trans.foreignKey FROM {$translationMeta->rootEntityName} trans";
             $dql .= ' WHERE trans.objectClass = :class';
+            $dql .= ' AND trans.locale = :locale';
             $dql .= ' AND trans.field = :field';
             $dql .= ' AND trans.content = :value';
             $q = $this->_em->createQuery($dql);
-            $q->setParameters(compact('class', 'field', 'value'));
+            $q->setParameters(compact('class', 'locale', 'field', 'value'));
             $q->setMaxResults(1);
             $result = $q->getArrayResult();
             $id = count($result) ? $result[0]['foreignKey'] : null;
