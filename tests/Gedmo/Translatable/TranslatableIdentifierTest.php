@@ -92,6 +92,9 @@ class TranslatableIdentifierTest extends BaseTestCaseORM
         $this->assertArrayHasKey('title', $translations['de_de']);
         $this->assertEquals('title in de', $translations['de_de']['title']);
 
+        $this->em->clear();
+        $this->translatableListener->setTranslatableLocale('en_us');
+
         // dql test object hydration
         $q = $this->em
             ->createQuery('SELECT si FROM ' . self::FIXTURE . ' si WHERE si.uid = :id')
